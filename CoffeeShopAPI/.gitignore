@@ -1,0 +1,5 @@
+appsettings.json
+/Migrations/20240326112532_InitialMigration.cs
+/Migrations/20240327093043_Order.cs
+/Migrations/20240327100842_OrderUpdated.cs
+/Migrations/DataContextModelSnapshot.cs
