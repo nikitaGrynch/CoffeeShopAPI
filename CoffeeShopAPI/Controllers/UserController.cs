@@ -59,5 +59,17 @@ public class UserController : Controller
         return Ok(_userDao.GetAll());
     }
     
+    [Route("ChangePassword")]
+    [HttpPatch]
+    public IActionResult ChangePassword(String userId, [FromBody]ChangeUserPasswordModel changePasswordModel)
+    {
+        ResponseModel res = _userDao.ChangePassword(userId ,changePasswordModel);
+        if (!res.Success)
+        {
+            return BadRequest(res);
+        }
+        return Ok(res);
+    }
+    
     
 }

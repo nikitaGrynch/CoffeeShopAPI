@@ -71,7 +71,6 @@ public class UserDao
             };
         }
         
-        // password must be at least 6 characters
         if(registrationModel.Password.Length < 6)
         {
             return new UserAuthResponseModel
@@ -80,7 +79,6 @@ public class UserDao
                 Success = false
             };
         }
-        // password must contain al least one digit
         if (!Regex.IsMatch(registrationModel.Password, @"\d"))
         {
             return new UserAuthResponseModel
@@ -89,7 +87,6 @@ public class UserDao
                 Success = false
             };
         }
-        // password must contain at least one lower case letter
         if (!Regex.IsMatch(registrationModel.Password, @"[a-z]"))
         {
             return new UserAuthResponseModel
@@ -98,7 +95,6 @@ public class UserDao
                 Success = false
             };
         }
-        // password must contain at least one upper case letter
         if (!Regex.IsMatch(registrationModel.Password, @"[A-Z]"))
         {
             return new UserAuthResponseModel
@@ -168,6 +164,107 @@ public class UserDao
         {
             User = user,
             Message = "User logged in successfully",
+            Success = true
+        };
+    }
+
+    public ResponseModel ChangePassword(String userId, ChangeUserPasswordModel changePassModel)
+    {
+        User user = _dataContext.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+        if (user == null)
+        {
+            return new ResponseModel
+            {
+                Message = "User does not exist",
+                Success = false
+            };
+        }
+
+        if (String.IsNullOrEmpty(changePassModel.OldPassword))
+        {
+            return new ResponseModel()
+            {
+                Message = "Old password is required",
+                Success = false
+            };
+        }
+        if (String.IsNullOrEmpty(changePassModel.NewPassword))
+        {
+            return new ResponseModel()
+            {
+                Message = "New password is required",
+                Success = false
+            };
+        }
+        if(changePassModel.NewPassword.Length < 6)
+        {
+            return new ResponseModel()
+            {
+                Message = "Password must be at least 6 characters",
+                Success = false
+            };
+        }
+        if (!Regex.IsMatch(changePassModel.NewPassword, @"\d"))
+        {
+            return new ResponseModel()
+            {
+                Message = "Password must contain at least one digit",
+                Success = false
+            };
+        }
+        if (!Regex.IsMatch(changePassModel.NewPassword, @"[a-z]"))
+        {
+            return new UserAuthResponseModel
+            {
+                Message = "Password must contain at least one lower case letter",
+                Success = false
+            };
+        }
+        if (!Regex.IsMatch(changePassModel.NewPassword, @"[A-Z]"))
+        {
+            return new UserAuthResponseModel
+            {
+                Message = "Password must contain at least one upper case letter",
+                Success = false
+            };
+        }
+        if (String.IsNullOrEmpty(changePassModel.ConfirmPassword))
+        {
+            return new ResponseModel()
+            {
+                Message = "Confirm password is required",
+                Success = false
+            };
+        }
+        if (!_hashService.Verify(changePassModel.OldPassword, user.PasswordHash))
+        {
+            return new ResponseModel
+            {
+                Message = "Old password is not valid",
+                Success = false
+            };
+        }
+        if(_hashService.Verify(changePassModel.NewPassword, user.PasswordHash))
+        {
+            return new ResponseModel
+            {
+                Message = "New password must be different from the old password",
+                Success = false
+            };
+        }
+        if (changePassModel.NewPassword != changePassModel.ConfirmPassword)
+        {
+            return new ResponseModel
+            {
+                Message = "New password and confirm password do not match",
+                Success = false
+            };
+        }
+        user.PasswordHash = _hashService.Hash(changePassModel.NewPassword);
+        _dataContext.SaveChanges();
+        return new ResponseModel
+        {
+            Message = "Password changed successfully",
             Success = true
         };
     }
